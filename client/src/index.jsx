@@ -20,10 +20,12 @@ class App extends React.Component {
     this.getMovies = this.getMovies.bind(this);
     this.saveMovie = this.saveMovie.bind(this);
     this.deleteMovie = this.deleteMovie.bind(this);
+    this.getFavorites = this.getFavorites.bind(this);
   }
 
   componentDidMount() {
     this.getMovies(28);
+    this.getFavorites();
   }
   
   getMovies(genre) {
@@ -44,24 +46,38 @@ class App extends React.Component {
     })
   }
 
+  getFavorites() {
+    axios.get('movies/favorites')
+    .then((moviesFound) => {
+      this.setState({
+        favorites: moviesFound.data
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+  }
+
   saveMovie(movie) {
     axios.post('movies/save', {
       movie: movie
     })
     .then((res) => {
-
+      this.getFavorites();
     })
     .catch((err) => {
       console.log(err);
     });
   }
 
-  deleteMovie() {
-    axios.post('movies/delete', {
-      movie: movie
+  deleteMovie(movie) {
+    axios.delete('movies/delete', {
+      params: {
+        movie: movie
+      }
     })
     .then((res) => {
-
+      this.getFavorites();
     })
     .catch((err) => {
       console.log(err);
@@ -82,7 +98,7 @@ class App extends React.Component {
         
         <div className="main">
           <Search swapFavorites={this.swapFavorites} getMovies={this.getMovies} selectGenre={this.selectGenre} showFaves={this.state.showFaves}/>
-          <Movies movies={this.state.showFaves ? this.state.favorites : this.state.movies} saveMovie={this.saveMovie} showFaves={this.state.showFaves}/>
+          <Movies movies={this.state.showFaves ? this.state.favorites : this.state.movies} saveMovie={this.saveMovie} deleteMovie={this.deleteMovie} showFaves={this.state.showFaves}/>
         </div>
       </div>
     );
